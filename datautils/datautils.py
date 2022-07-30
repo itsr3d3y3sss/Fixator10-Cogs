@@ -60,18 +60,6 @@ class DataUtils(commands.Cog):
             color=await ctx.embed_color(),
         )
         em.add_field(name=_("ID"), value=user.id)
-        em.add_field(name=_("Bot?"), value=bool_emojify(user.bot))
-        em.add_field(name=_("System?"), value=bool_emojify(user.system))
-        em.add_field(name=_("Mention"), value=user.mention)
-        em.add_field(
-            name=_("Default avatar"),
-            value=f"[{user.default_avatar}]({user.default_avatar_url})",
-        )
-        if user.avatar:
-            em.add_field(
-                name=_("Avatar"),
-                value=f"[`{user.avatar}`]({user.avatar_url_as(static_format='png', size=4096)})",
-            )
         if user.public_flags.value:
             em.add_field(
                 name=_("Public flags"),
@@ -81,10 +69,6 @@ class DataUtils(commands.Cog):
                 ),
                 inline=False,
             )
-        em.set_image(url=user.avatar_url_as(static_format="png", size=4096))
-        em.set_thumbnail(url=user.default_avatar_url)
-        em.set_footer(text=_("Created at"))
-        await ctx.send(embed=em)
 
     @commands.command(aliases=["widgetinfo"], hidden=True)
     @commands.bot_has_permissions(embed_links=True)
@@ -127,10 +111,10 @@ class DataUtils(commands.Cog):
                 em.add_field(
                     name=_("Features"),
                     value="\n".join(_(GUILD_FEATURES.get(f, f)) for f in guild.features).format(
-                        banner=guild.banner and f" [🔗]({guild.banner_url_as(format='png')})" or "",
-                        splash=guild.splash and f" [🔗]({guild.splash_url_as(format='png')})" or "",
+                        banner=guild.banner and f" [??]({guild.banner_url_as(format='png')})" or "",
+                        splash=guild.splash and f" [??]({guild.splash_url_as(format='png')})" or "",
                         discovery=getattr(guild, "discovery_splash", None)
-                        and f" [🔗]({guild.discovery_splash_url_as(format='png')})"
+                        and f" [??]({guild.discovery_splash_url_as(format='png')})"
                         or "",
                     ),
                     inline=False,
@@ -145,27 +129,13 @@ class DataUtils(commands.Cog):
     @commands.command(aliases=["memberinfo", "membinfo"])
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
-    async def uinfo(self, ctx, *, member: discord.Member = None):
+    async def userinfo(self, ctx, *, member: discord.Member = None):
         """Information on a user"""
         if member is None:
             member = ctx.message.author
         em = discord.Embed(
             title=chat.escape(str(member), formatting=True),
-            color=member.color.value and member.color or discord.Embed.Empty,
-        )
-        if member.nick:
-            em.add_field(name=_("Nickname"), value=member.nick)
-        else:
-            em.add_field(name=_("Name"), value=member.name)
-        em.add_field(
-            name=_("Client"),
-            value="📱: {}\n"
-            "🖥: {}\n"
-            "🌎: {}".format(
-                str(member.mobile_status).capitalize(),
-                str(member.desktop_status).capitalize(),
-                str(member.web_status).capitalize(),
-            ),
+            color=discord.Colour.dark_theme(),
         )
         em.add_field(
             name=_("Joined server"),
@@ -183,21 +153,8 @@ class DataUtils(commands.Cog):
                 name=_("Boosted server"),
                 value=get_markdown_timestamp(member.premium_since, TimestampStyle.datetime_long),
             )
-        em.add_field(name=_("Bot?"), value=bool_emojify(member.bot))
-        em.add_field(name=_("System?"), value=bool_emojify(member.system))
-        em.add_field(
-            name=_("Server permissions"),
-            value="[{0}](https://cogs.fixator10.ru/permissions-calculator/?v={0})".format(
-                member.guild_permissions.value
-            ),
-        )
         if member.voice:
             em.add_field(name=_("In voice channel"), value=member.voice.channel.mention)
-        em.add_field(
-            name=_("Mention"),
-            value=f"{member.mention}\n{chat.inline(member.mention)}",
-            inline=False,
-        )
         if roles := [role.name for role in member.roles if not role.is_default()]:
             em.add_field(
                 name=_("Roles"),
@@ -215,8 +172,7 @@ class DataUtils(commands.Cog):
                 ),
                 inline=False,
             )
-        em.set_image(url=member.avatar_url_as(static_format="png", size=4096))
-        # em.set_thumbnail(url=member.default_avatar_url)
+        em.set_thumbnail(url=member.avatar_url_as(static_format="png", size=4096))
         await ctx.send(embed=em)
 
     @commands.command(aliases=["activity"])
@@ -358,10 +314,10 @@ class DataUtils(commands.Cog):
                 value="\n".join(
                     sorted(_(GUILD_FEATURES.get(f, f)) for f in server.features)
                 ).format(
-                    banner=server.banner and f" [🔗]({server.banner_url_as(format='png')})" or "",
-                    splash=server.splash and f" [🔗]({server.splash_url_as(format='png')})" or "",
+                    banner=server.banner and f" [??]({server.banner_url_as(format='png')})" or "",
+                    splash=server.splash and f" [??]({server.splash_url_as(format='png')})" or "",
                     discovery=server.discovery_splash
-                    and f" [🔗]({server.discovery_splash_url_as(format='png')})"
+                    and f" [??]({server.discovery_splash_url_as(format='png')})"
                     or "",
                 ),
                 inline=False,
@@ -581,7 +537,7 @@ class DataUtils(commands.Cog):
         """Get all roles on server"""
         if server is None or not await self.bot.is_owner(ctx.author):
             server = ctx.guild
-        roles = [(role.id, shorten(role.name, 32, placeholder="…")) for role in server.roles]
+        roles = [(role.id, shorten(role.name, 32, placeholder="�")) for role in server.roles]
         await BaseMenu(
             PagePager(
                 list(
