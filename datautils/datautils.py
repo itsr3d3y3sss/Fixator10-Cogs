@@ -211,15 +211,6 @@ class DataUtils(commands.Cog):
             value=get_markdown_timestamp(server.created_at, TimestampStyle.datetime_long),
         )
         em.add_field(name=_("Owner"), value=chat.escape(str(server.owner), formatting=True))
-
-        em.add_field(
-            name=_("Default notifications"),
-            value=_("All messages")
-            if server.default_notifications == discord.NotificationLevel.all_messages
-            else _("Only @mentions")
-            if server.default_notifications == discord.NotificationLevel.only_mentions
-            else _("Unknown"),
-        )
         em.add_field(
             name=_("Stats"),
             value=_(
@@ -229,9 +220,6 @@ class DataUtils(commands.Cog):
                 "**Emoji count:** {emojis}/{emoji_limit}\n"
                 "**Animated emoji count:** {animated_emojis}/{emoji_limit}\n"
                 "**Boosters:** {boosters} ({boosts} **boosts**) (**Tier:** {tier}/3)\n"
-                "**Max bitrate:** {bitrate} kbps\n"
-                "**Max filesize:** {files} MB\n"
-                "**Max users in voice with video:** {max_video}"
             ).format(
                 members=server.member_count,
                 members_limit=server.max_members or "100000",
@@ -243,9 +231,6 @@ class DataUtils(commands.Cog):
                 tier=server.premium_tier,
                 boosters=len(server.premium_subscribers),
                 boosts=server.premium_subscription_count,
-                bitrate=server.bitrate_limit / 1000,
-                files=server.filesize_limit / 1048576,
-                max_video=server.max_video_channel_users,
             ),
             inline=False,
         )
