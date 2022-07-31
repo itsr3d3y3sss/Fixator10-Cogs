@@ -190,7 +190,7 @@ class DataUtils(commands.Cog):
     @commands.command(aliases=["servinfo", "serv", "sv"])
     @commands.guild_only()
     @commands.bot_has_permissions(embed_links=True)
-    async def sinfo(self, ctx, *, server: commands.GuildConverter = None):
+    async def serverinfo(self, ctx, *, server: commands.GuildConverter = None):
         """Shows server information"""
         if server is None or not await self.bot.is_owner(ctx.author):
             server = ctx.guild
@@ -202,7 +202,7 @@ class DataUtils(commands.Cog):
         em = discord.Embed(
             title=_("Server info"),
             description=server.description and server.description or None,
-            color=server.owner.color.value and server.owner.color or discord.Embed.Empty,
+            color=discord.Colour.dark_theme(),
         )
         em.add_field(name=_("Name"), value=chat.escape(server.name, formatting=True))
         em.add_field(name=_("Server ID"), value=server.id)
@@ -210,40 +210,8 @@ class DataUtils(commands.Cog):
             name=_("Exists since"),
             value=get_markdown_timestamp(server.created_at, TimestampStyle.datetime_long),
         )
-        em.add_field(name=_("Region"), value=server.region)
-        if server.preferred_locale:
-            em.add_field(name=_("Discovery language"), value=server.preferred_locale)
         em.add_field(name=_("Owner"), value=chat.escape(str(server.owner), formatting=True))
-        em.add_field(
-            name=_("AFK timeout and channel"),
-            value=_("{} min in {}").format(
-                afk, chat.escape(str(server.afk_channel), formatting=True)
-            ),
-        )
-        em.add_field(
-            name=_("Verification level"),
-            value=_("None")
-            if server.verification_level == discord.VerificationLevel.none
-            else _("Low")
-            if server.verification_level == discord.VerificationLevel.low
-            else _("Medium")
-            if server.verification_level == discord.VerificationLevel.medium
-            else _("High")
-            if server.verification_level == discord.VerificationLevel.high
-            else _("Highest")
-            if server.verification_level == discord.VerificationLevel.extreme
-            else _("Unknown"),
-        )
-        em.add_field(
-            name=_("Explicit content filter"),
-            value=_("Don't scan any messages.")
-            if server.explicit_content_filter == discord.ContentFilter.disabled
-            else _("Scan messages from members without a role.")
-            if server.explicit_content_filter == discord.ContentFilter.no_role
-            else _("Scan messages sent by all members.")
-            if server.explicit_content_filter == discord.ContentFilter.all_members
-            else _("Unknown"),
-        )
+
         em.add_field(
             name=_("Default notifications"),
             value=_("All messages")
@@ -252,35 +220,9 @@ class DataUtils(commands.Cog):
             if server.default_notifications == discord.NotificationLevel.only_mentions
             else _("Unknown"),
         )
-        em.add_field(name=_("2FA admins"), value=bool_emojify(server.mfa_level))
-        if server.rules_channel:
-            em.add_field(
-                name=_("Rules channel"),
-                value=chat.escape(server.rules_channel.name, formatting=True),
-            )
-        if server.public_updates_channel:
-            em.add_field(
-                name=_("Public updates channel"),
-                value=chat.escape(server.public_updates_channel.name, formatting=True),
-            )
-        if server.system_channel:
-            em.add_field(
-                name=_("System messages channel"),
-                value=_(
-                    "**Channel:** {channel}\n"
-                    "**Welcome message:** {welcome}\n"
-                    "**Boosts:** {boost}"
-                ).format(
-                    channel=chat.escape(server.system_channel.name, formatting=True),
-                    welcome=bool_emojify(server.system_channel_flags.join_notifications),
-                    boost=bool_emojify(server.system_channel_flags.premium_subscriptions),
-                ),
-                inline=False,
-            )
         em.add_field(
             name=_("Stats"),
             value=_(
-                "**Bot's shard:** {shard}\n"
                 "**Member count:** {members}/{members_limit}\n"
                 "**Role count:** {roles}/250\n"
                 "**Channel count:** {channels}/500\n"
@@ -291,7 +233,6 @@ class DataUtils(commands.Cog):
                 "**Max filesize:** {files} MB\n"
                 "**Max users in voice with video:** {max_video}"
             ).format(
-                shard=server.shard_id,
                 members=server.member_count,
                 members_limit=server.max_members or "100000",
                 roles=len(server.roles),
@@ -314,23 +255,15 @@ class DataUtils(commands.Cog):
                 value="\n".join(
                     sorted(_(GUILD_FEATURES.get(f, f)) for f in server.features)
                 ).format(
-                    banner=server.banner and f" [??]({server.banner_url_as(format='png')})" or "",
-                    splash=server.splash and f" [??]({server.splash_url_as(format='png')})" or "",
+                    banner=server.banner and f" [click here for image]({server.banner_url_as(format='png')})" or "",
+                    splash=server.splash and f" [click here for image]({server.splash_url_as(format='png')})" or "",
                     discovery=server.discovery_splash
-                    and f" [??]({server.discovery_splash_url_as(format='png')})"
+                    and f" [click here for image]({server.discovery_splash_url_as(format='png')})"
                     or "",
                 ),
                 inline=False,
             )
-        roles_str = _("**Everyone role:** {}").format(server.default_role)
-        if boost_role := server.premium_subscriber_role:
-            roles_str += "\n" + _("**Booster role:** {}").format(boost_role)
-        if bot_role := server.self_role:
-            roles_str += "\n" + _("**{} role:** {}").format(ctx.me.display_name, bot_role)
-        em.add_field(name=_("Roles"), value=roles_str, inline=False)
-        if widget.invite_url:
-            em.add_field(name=_("Widget's invite"), value=widget.invite_url)
-        em.set_image(url=server.icon_url_as(static_format="png", size=4096))
+        em.set_thumbnail(url=server.icon_url_as(static_format="png", size=4096))
         await ctx.send(embed=em)
 
     @commands.command()
@@ -537,7 +470,7 @@ class DataUtils(commands.Cog):
         """Get all roles on server"""
         if server is None or not await self.bot.is_owner(ctx.author):
             server = ctx.guild
-        roles = [(role.id, shorten(role.name, 32, placeholder="�")) for role in server.roles]
+        roles = [(role.id, shorten(role.name, 32, placeholder=" ")) for role in server.roles]
         await BaseMenu(
             PagePager(
                 list(
