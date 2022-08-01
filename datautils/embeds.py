@@ -163,7 +163,7 @@ async def activity_embed(ctx, activity: discord.Activity) -> discord.Embed:
     elif isinstance(activity, discord.Spotify):
         em = discord.Embed(
             title=activity.title,
-            description=_("by {}\non {}").format(", ".join(activity.artists), activity.album),
+            description=_("by **{}**\non **{}**").format(", ".join(activity.artists), activity.album),
             color=discord.Colour.dark_theme(),
             timestamp=activity.created_at,
             url=f"https://open.spotify.com/track/{activity.track_id}",
@@ -177,7 +177,7 @@ async def activity_embed(ctx, activity: discord.Activity) -> discord.Embed:
             name=_("Will end at"),
             value=get_markdown_timestamp(activity.end, TimestampStyle.time_long),
         )
-        em.set_image(url=activity.album_cover_url)
+        em.set_thumbnail(url=activity.album_cover_url)
         em.set_footer(text=_("Listening since"))
     else:
         em = discord.Embed(title=_("Unsupported activity type: {}").format(type(activity)))
