@@ -164,7 +164,7 @@ async def activity_embed(ctx, activity: discord.Activity) -> discord.Embed:
         em = discord.Embed(
             title=activity.title,
             description=_("by {}\non {}").format(", ".join(activity.artists), activity.album),
-            color=activity.color,
+            color=discord.Colour.dark_theme(),
             timestamp=activity.created_at,
             url=f"https://open.spotify.com/track/{activity.track_id}",
         )
