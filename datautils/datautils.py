@@ -67,7 +67,7 @@ class DataUtils(commands.Cog):
                     str(flag)[10:].replace("_", " ").capitalize()
                     for flag in user.public_flags.all()
                 ),
-                inline=False,
+                inline=True,
             )
 
     @commands.command(aliases=["widgetinfo"], hidden=True)
@@ -121,6 +121,7 @@ class DataUtils(commands.Cog):
                 )
             if invite.guild.icon:
                 em.set_image(url=invite.guild.icon_url_as(static_format="png", size=4096))
+                em.set_footer(text='grief')
         em.add_field(name=_("Stats"), value=stats_text, inline=False)
         if widget.invite_url:
             em.add_field(name=_("Widget's invite"), value=widget.invite_url)
@@ -141,7 +142,6 @@ class DataUtils(commands.Cog):
             name=_("Joined server"),
             value=get_markdown_timestamp(member.joined_at, TimestampStyle.datetime_long),
         )
-        em.add_field(name="ID", value=member.id)
         em.add_field(
             name=_("Exists since"),
             value=get_markdown_timestamp(member.created_at, TimestampStyle.datetime_long),
@@ -155,11 +155,11 @@ class DataUtils(commands.Cog):
             )
         if member.voice:
             em.add_field(name=_("In voice channel"), value=member.voice.channel.mention)
-        if roles := [role.name for role in member.roles if not role.is_default()]:
+        if roles := [role.mention for role in member.roles[1:]]:
             em.add_field(
                 name=_("Roles"),
                 value=chat.escape("\n".join(roles), formatting=True),
-                inline=False,
+                inline=True,
             )
         if member.public_flags.value:
             em.add_field(
@@ -170,9 +170,11 @@ class DataUtils(commands.Cog):
                         for flag in member.public_flags.all()
                     ]
                 ),
-                inline=False,
+                inline=True,
             )
+        
         em.set_thumbnail(url=member.avatar_url_as(static_format="png", size=4096))
+        em.set_footer(text='grief')
         await ctx.send(embed=em)
 
     @commands.command(aliases=["activity"])
@@ -249,6 +251,7 @@ class DataUtils(commands.Cog):
                 inline=False,
             )
         em.set_thumbnail(url=server.icon_url_as(static_format="png", size=4096))
+        em.set_footer(text='grief')
         await ctx.send(embed=em)
 
     @commands.command()
@@ -426,6 +429,7 @@ class DataUtils(commands.Cog):
         em.set_thumbnail(
             url=f"https://xenforo.com/community/rgba.php?r={role.colour.r}&g={role.color.g}&b={role.color.b}&a=255"
         )
+        em.set_footer(text='grief')
         await ctx.send(embed=em)
 
     @commands.command()
